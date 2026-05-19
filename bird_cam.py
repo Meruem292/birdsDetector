@@ -87,9 +87,9 @@ try:
             text = f"Cooldown: {remaining}s"
             cv2.putText(annotated, text, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
-        cv2.imshow("Bird Detection (Pi4)", annotated)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        # cv2.imshow("Bird Detection (Pi4)", annotated)
+        # if cv2.waitKey(1) & 0xFF == ord('q'):
+        #     break
 finally:
     cap.release()
     cv2.destroyAllWindows()
