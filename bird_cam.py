@@ -23,7 +23,7 @@ else:
     model_path = "yolov8l.pt"
 
 model = YOLO(model_path, task="detect")
-
+model.to('cpu')  # Add this line right after
 # Select camera from env `CAMERA` (index like 0,1 or path like /dev/video0)
 camera_env = os.getenv('CAMERA', '0')
 try:
