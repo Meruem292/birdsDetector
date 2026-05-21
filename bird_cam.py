@@ -3,7 +3,6 @@ import time
 import threading
 import urllib.request
 import urllib.error
-
 import cv2
 from ultralytics import YOLO
 import numpy as np
@@ -31,9 +30,10 @@ print(f"Using camera: {camera_env}")
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
 
-api_url = "https://agri-sound.vercel.app/api/play"
+api_url = "https://vercel.app"
 last_api_call = 0.0
-cooldown_seconds = 30.0
+# SET COOLDOWN TO 60 SECONDS (1 MINUTE)
+cooldown_seconds = 60.0
 
 process_every_n_frames = 3  
 imgsz = 320
@@ -52,6 +52,7 @@ def call_api_async(url: str):
         print(f"\n[!] API call failed: {e}")
 
 print("--- GO SIGNAL: SCANNING STARTED ---")
+print(f"Cooldown set to {cooldown_seconds} seconds.")
 
 frame_idx = 0
 try:
@@ -63,26 +64,27 @@ try:
 
         frame_idx += 1
 
-        # Only run detection on a subset of frames
         if frame_idx % process_every_n_frames == 0:
-            # Heartbeat print: so you know it's still scanning
+            # Heartbeat print to show active scanning
             if frame_idx % 30 == 0:
-                print(".", end="", flush=True) # Prints a dot every few seconds
+                print(".", end="", flush=True) 
 
             results = model(frame, imgsz=imgsz, conf=conf_thres, iou=iou_thres, classes=[target_class], verbose=False)
 
+            # Check if a bird was found in this frame
             if len(results) > 0 and len(results[0].boxes) > 0:
                 now = time.time()
                 with lock:
+                    # Only call API if 1 minute has passed since the last call
                     if now - last_api_call >= cooldown_seconds:
                         threading.Thread(target=call_api_async, args=(api_url,), daemon=True).start()
                         last_api_call = now
+                    else:
+                        remaining = int(cooldown_seconds - (now - last_api_call))
+                        # Optional: prints remaining cooldown if you are watching the logs
+                        print(f" (Bird seen, but on cooldown: {remaining}s)", end="", flush=True)
 
-        # GUI DISABLED FOR REMOTE PI (prevents crashes)
-        # cv2.imshow("Bird Detection (Pi4)", frame)
-        # if cv2.waitKey(1) & 0xFF == ord('q'):
-        #     break
+        # GUI is disabled for Headless OpenCV stability
 finally:
     print("\nStopping...")
     cap.release()
-    # cv2.destroyAllWindows()
