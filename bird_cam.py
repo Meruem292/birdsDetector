@@ -30,7 +30,7 @@ print(f"Using camera: {camera_env}")
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
 
-api_url = "https://vercel.app"
+api_url = "https://agri-sound.vercel.app/api/play"
 last_api_call = 0.0
 # SET COOLDOWN TO 60 SECONDS (1 MINUTE)
 cooldown_seconds = 60.0
